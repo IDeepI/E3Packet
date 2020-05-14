@@ -53,6 +53,7 @@
             this.listOpendFiles.Name = "listOpendFiles";
             this.listOpendFiles.Size = new System.Drawing.Size(256, 260);
             this.listOpendFiles.TabIndex = 0;
+            this.listOpendFiles.SelectedValueChanged += new System.EventHandler(this.listOpendFiles_SelectedValueChanged);
             // 
             // label1
             // 
@@ -153,6 +154,7 @@
             this.listAvailableScripts.Name = "listAvailableScripts";
             this.listAvailableScripts.Size = new System.Drawing.Size(256, 260);
             this.listAvailableScripts.TabIndex = 13;
+            this.listAvailableScripts.SelectedValueChanged += new System.EventHandler(this.listAvailableScripts_SelectedValueChanged);
             // 
             // filesBrowserDialog
             // 

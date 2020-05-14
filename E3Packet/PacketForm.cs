@@ -32,9 +32,13 @@ namespace E3Packet
             
 
             this.AutoSize = true;
-           // GetScriptDictionary();
-          //  listAvailableScripts.Items.AddRange(listScriptFileItems.Select(x => x.shortScriptName).ToArray());
-            
+
+            FileLogic.SetCheckedFiles(listOpendFiles);
+            FileLogic.SetCheckedScripts(listAvailableScripts);
+
+            // GetScriptDictionary();
+            //  listAvailableScripts.Items.AddRange(listScriptFileItems.Select(x => x.shortScriptName).ToArray());
+
         }
         /*private void GetScriptDictionary()
         {
@@ -133,8 +137,19 @@ namespace E3Packet
 
         private void RunExecution_Click(object sender, EventArgs e)
         {
-            // Run selected files
+            // Run selected files            
             FileLogic.RunFile(FileLogic.listFileItems.Where(x => x.ItemChecked).ToList());
+        }
+
+        private void listOpendFiles_SelectedValueChanged(object sender, EventArgs e)
+        {
+            FileLogic.SetCheckedFiles(listOpendFiles);
+        }
+
+        private void listAvailableScripts_SelectedValueChanged(object sender, EventArgs e)
+        {
+            FileLogic.SetCheckedScripts(listAvailableScripts);
+            FileLogic.AddSelectedScriptsToFiles();
         }
     }
 }

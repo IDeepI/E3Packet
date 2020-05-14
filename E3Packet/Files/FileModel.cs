@@ -65,7 +65,11 @@ namespace E3Packet
         {
             // Open File
             e3Application project = AppConnect.ToE3(fullPath, out bool quitThenDone);
-            FileLogic.RunScripts(project, ScriptsToExecute);
+            if (ScriptsToExecute != null)
+            {
+                FileLogic.RunScripts(project, ScriptsToExecute);
+            }
+           
             if (quitThenDone)
             {
                 project.Quit();

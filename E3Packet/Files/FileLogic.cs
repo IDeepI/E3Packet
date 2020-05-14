@@ -1,21 +1,17 @@
 ﻿using ConnectToE3;
 using e3;
-using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace E3Packet
 {
-    public static class  FileLogic
-    {        
+    public static class FileLogic
+    {
         //public static Dictionary<string, string> scriptsDictionary = new Dictionary<string, string>();
         /// <summary>
         /// List of loaded scripts
@@ -37,7 +33,7 @@ namespace E3Packet
             Dictionary<string, e3Application> e3ProcessDictionary = new Dictionary<string, e3Application>();
             e3ProcessDictionary = AppConnect.GetE3ProcessDictionary();
             // Iterate through existing list of files to exclude already opened  
-            CheckedListBox.ObjectCollection opendFiles = listOpendFiles.Items;
+            string[] opendFiles = listOpendFiles.Items.Cast<string>().ToArray();
             foreach (var opendFile in opendFiles)
             {
                 if (e3ProcessDictionary.ContainsKey(opendFile.ToString()))
@@ -64,31 +60,46 @@ namespace E3Packet
             // Adding new files from browsed files to Form
             foreach (var browsedFilePath in listFileItems)
             {
-                if (!listOpendFiles.Items.Contains(browsedFilePath))
+                if (!listOpendFiles.Items.Contains(browsedFilePath.fullPath))
                 {
-                    listOpendFiles.Items.Add(browsedFilePath);
+                    listOpendFiles.Items.Add(browsedFilePath.fullPath);
                 }
             }
             listOpendFiles.Refresh();
             listOpendFiles.Size = new Size(100, 100);
-
-            AddSelectedScriptsToFiles();
         }
         /// <summary>
         /// Adding selected in form scripts to selected file objects
         /// </summary>
         public static void AddSelectedScriptsToFiles()
         {
-            Изучить Linq https://metanit.com/sharp/tutorial/15.1.php потом применять
-            foreach listFileItems.Where(x => x.ItemChecked).ScriptsToExecute = listScriptFileItems.Where(x => x.ItemChecked);
+
+            List<ScriptFileItem> checkedScripts = listScriptFileItems.Where(x => x.ItemChecked).ToList();
+
+            foreach (FileItem file in listFileItems)
+            {
+                if (file.ItemChecked)
+                {
+                    file.ScriptsToExecute = checkedScripts;
+                }
+            }
+
         }
 
         internal static void RunScripts(e3Application project, List<ScriptFileItem> scriptsToExecute)
         {
-            throw new NotImplementedException();
+            foreach (ScriptFileItem script in scriptsToExecute)
+            {
+                RunScript(script, project);
+            }
         }
 
-       
+        private static void RunScript(ScriptFileItem script, e3Application project)
+        {
+            project.Run(script.fullPath, "");
+        }
+
+
         /// <summary>
         /// Load choosed scripts in form 
         /// </summary>
@@ -122,15 +133,64 @@ namespace E3Packet
         /// <param name="fileItems"> Files to open </param>
         public static void RunFile(List<FileItem> fileItems)
         {
-            foreach (var file in fileItems)
+            if (fileItems != null)
             {
-                Thread e3Thread = new Thread(new ThreadStart(file.Process));
-                e3Thread.Start();
+                foreach (var file in fileItems)
+                {
+                    Thread e3Thread = new Thread(new ThreadStart(file.Process));
+                    e3Thread.Start();
+                }
             }
         }
 
+        internal static void SetCheckedFiles(CheckedListBox listOpendFiles)
+        {
+            if (listFileItems != null)
+            {
+                foreach (var item in listFileItems)
+                {
+                    item.ItemChecked = false;
+                }
+                if (listOpendFiles != null)
+                {
+                    foreach (var item in listOpendFiles.CheckedItems)
+                    {
+                        SetCheckedItem(listFileItems, item.ToString());
+                    }
+                }
+            }
+        }
 
-       private static List<ScriptFileItem> GetFiles(string dirName, string extention)
+        internal static void SetCheckedScripts(CheckedListBox listAvailableScripts)
+        {
+            if (listScriptFileItems != null)
+            {
+                foreach (var item in listScriptFileItems)
+                {
+                    item.ItemChecked = false;
+                }
+                if (listAvailableScripts != null)
+                {
+                    foreach (var item in listAvailableScripts.CheckedItems)
+                    {
+                        SetCheckedItem(listScriptFileItems, item.ToString());
+                    }
+                }
+            }
+        }
+
+        private static void SetCheckedItem<T>(List<T> fileItems, string selectedItem) where T : FolderItem
+        {
+            foreach (var item in fileItems)
+            {
+                if (item.fullPath == selectedItem)
+                {
+                    item.ItemChecked = true;
+                }
+            }
+        }
+
+        private static List<ScriptFileItem> GetFiles(string dirName, string extention)
         {
             List<ScriptFileItem> filePaths = new List<ScriptFileItem>();
             if (Directory.Exists(dirName))
@@ -142,7 +202,7 @@ namespace E3Packet
                 foreach (string dir in dirs)
                 {
                     Debug.WriteLine(dir);
-                   // listFolderItems.Add(new FolderItem(dir));
+                    // listFolderItems.Add(new FolderItem(dir));
                     //listFolderItems.Last().ItemChecked = true;
                     // Do not include this directories
                     // if (listAvailableFolders.CheckedItems.Contains(Path.GetFileName(dir)))
