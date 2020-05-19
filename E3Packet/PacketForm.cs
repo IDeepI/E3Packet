@@ -1,10 +1,4 @@
-﻿using ConnectToE3;
-using e3;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
-using System.Drawing;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -12,7 +6,7 @@ using System.Windows.Forms;
 namespace E3Packet
 {
     public partial class PacketForm : Form
-    {                
+    {
         public PacketForm()
         {
             InitializeComponent();
@@ -20,101 +14,50 @@ namespace E3Packet
 
         private void PacketForm_Load(object sender, EventArgs e)
         {
-            FileLogic.RefreshForm(listOpendFiles);
-            for (int i = 0; i < listOpendFiles.Items.Count; i++)
-                listOpendFiles.SetItemCheckState(i, CheckState.Checked);
+            FileLogic.RefreshForm(ref listFiles);
+            for (int i = 0; i < listFiles.Items.Count; i++)
+                listFiles.SetItemCheckState(i, CheckState.Checked);
 
-            listOpendFiles.AutoSize = true;
-            listAvailableScripts.AutoSize = true;
+            listFiles.AutoSize = true;
+            listScripts.AutoSize = true;
 
-            listOpendFiles.Sorted = true;
-            listAvailableScripts.Sorted = true;
-            
+            listFiles.Sorted = true;
+            listScripts.Sorted = true;
 
             this.AutoSize = true;
 
-            FileLogic.SetCheckedFiles(listOpendFiles);
-            FileLogic.SetCheckedScripts(listAvailableScripts);
-
-            // GetScriptDictionary();
-            //  listAvailableScripts.Items.AddRange(listScriptFileItems.Select(x => x.shortScriptName).ToArray());
-
-        }
-        /*private void GetScriptDictionary()
-        {
-            string extention = "*.vbs";
-            foreach (string fileScriptName in GetFiles(scriptsDirName, extention))
-            {
-                listAvailableScripts.Items.Add(fileScriptName.Replace(scriptsDirName, ""));
-            }
-            //listAvailableScripts.Items.AddRange(GetFiles(dirName, extention));
-        }*/
-        private void GetScriptDictionary()
-        {
-          //  string extention = "*.vbs";
-           // listScriptFileItems.AddRange(GetFiles(scriptsDirName, extention));
+            FileLogic.SetCheckedFiles(listFiles);
+            FileLogic.SetCheckedScripts(listScripts);
         }
 
-        /* private string[] GetFiles(string dirName, string extention)
-        {
-            List<string> filePaths = new List<string>();
-            if (Directory.Exists(dirName))
-            {
-                filePaths.AddRange(GetSubFiles(dirName, extention));
 
-                Debug.WriteLine("Подкаталоги:");
-                string[] dirs = Directory.GetDirectories(dirName);
-                foreach (string dir in dirs)
-                {
-                    Debug.WriteLine(dir);
-                    listAvailibleFolders.Items.Insert(0, dir.Replace(scriptsDirName, ""));
-                    listAvailibleFolders.SetItemCheckState(0, CheckState.Checked);
-                    // Do not include this directories
-                    if (listAvailibleFolders.CheckedItems.Contains(Path.GetFileName(dir)))
-                    {
-                        filePaths.AddRange(GetSubFiles(dir, extention));
-                    }
-                }
-                listAvailibleFolders.Sorted = true;
-            }
-            return filePaths.ToArray();
-            
-        }
-        private string[] GetSubFiles(string dirName, string extention)
-        {
-            List<string> filePaths = new List<string>();
-            Debug.WriteLine("Файлы:");
-            string[] files = Directory.GetFiles(dirName, extention);
-            foreach (string s in files)
-            {
-                Debug.WriteLine(s);
-                filePaths.Add(s);
-            }
-            return filePaths.ToArray();
-        }*/
-
-       
         private void PacketForm_MouseMove(object sender, MouseEventArgs e)
         {
-            FileLogic.RefreshForm(listOpendFiles);
+
         }
 
         private void BrowseForFiles_Click(object sender, EventArgs e)
         {
-            string folderName;           
+            string folderName;
 
-            /////////////////////////////////////////////// Got to choose active project path!!!
-            filesBrowserDialog.SelectedPath = GlobalConfig.filesDirName;
+            // choose active project path
+            folderName = listFiles?.CheckedItems[0]?.ToString();
+            filesBrowserDialog.SelectedPath = Directory.GetParent(folderName ?? GlobalConfig.filesDirName).ToString();
             // Show the FolderBrowserDialog
             DialogResult result = filesBrowserDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
                 folderName = filesBrowserDialog.SelectedPath;
 
-                FileLogic.LoadFiles(folderName);
-
-                FileLogic.RefreshForm(listOpendFiles);
+                GetFiles(folderName);
             }
+        }
+
+        public void GetFiles(string folderName)
+        {
+            FileLogic.LoadFiles(folderName);
+
+            FileLogic.RefreshForm(ref listFiles);
         }
 
         private void BrowseForScripts_Click(object sender, EventArgs e)
@@ -122,7 +65,7 @@ namespace E3Packet
             openScriptDialog.Filter = "Scripts (*.vbs;*.exe)|*.vbs;*.exe";
             openScriptDialog.Multiselect = true;
             openScriptDialog.InitialDirectory = GlobalConfig.scriptsDirName;
-            
+
             openScriptDialog.FilterIndex = 2;
             openScriptDialog.RestoreDirectory = true;
 
@@ -130,8 +73,8 @@ namespace E3Packet
             DialogResult result = openScriptDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
-                FileLogic.LoadScripts(openScriptDialog.FileNames, ref listAvailableScripts);
-                FileLogic.RefreshForm(listOpendFiles);                
+                FileLogic.LoadScripts(openScriptDialog.FileNames, ref listScripts);
+                FileLogic.RefreshForm(ref listFiles);
             }
         }
 
@@ -143,13 +86,53 @@ namespace E3Packet
 
         private void listOpendFiles_SelectedValueChanged(object sender, EventArgs e)
         {
-            FileLogic.SetCheckedFiles(listOpendFiles);
+
         }
 
         private void listAvailableScripts_SelectedValueChanged(object sender, EventArgs e)
         {
-            FileLogic.SetCheckedScripts(listAvailableScripts);
-            FileLogic.AddSelectedScriptsToFiles();
+
+        }
+
+        private void CancelExecution_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void AddSeletedFileFolderButton_Click(object sender, EventArgs e)
+        {
+            string folderName;
+
+            // choose active project path
+            string[] folderNameItems = listFiles.CheckedItems.Cast<string>().ToArray();
+            foreach (string folderNameItem in folderNameItems)
+            {
+                folderName = Directory.GetParent(folderNameItem).ToString();
+                GetFiles(folderName);
+            }
+        }
+
+        private void listOpendFiles_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            this.BeginInvoke(
+                (MethodInvoker)
+                (() => FileLogic.SetCheckedFiles(listFiles))
+                );
+        }
+
+        private void listAvailableScripts_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            FileLogic.SetCheckedScripts(listScripts);
+        }
+
+        private void refreshFormButton_Click(object sender, EventArgs e)
+        {
+            FileLogic.RefreshForm(ref listFiles);
+        }
+
+        private void listAvailableScripts_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

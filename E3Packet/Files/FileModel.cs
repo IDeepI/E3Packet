@@ -65,18 +65,16 @@ namespace E3Packet
         {
             // Open File
             e3Application project = AppConnect.ToE3(fullPath, out bool quitThenDone);
-            if (ScriptsToExecute != null)
+            if (FileLogic.listScriptFileItems.Any(x => x.ItemChecked))
             {
-                FileLogic.RunScripts(project, ScriptsToExecute);
+                FileLogic.RunScripts(project);
             }
            
             if (quitThenDone)
             {
                 project.Quit();
             }
-        }
-
-        public List<ScriptFileItem> ScriptsToExecute { get; set; }
+        } 
        
     }
     public class ScriptFileItem : FileItem
