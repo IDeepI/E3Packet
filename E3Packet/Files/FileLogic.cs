@@ -1,7 +1,7 @@
 ﻿using ConnectToE3;
 using e3;
-using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -19,6 +19,7 @@ namespace E3Packet
         /// List of loaded scripts
         /// </summary>
         public static List<ScriptFileItem> listScriptFileItems = new List<ScriptFileItem>();
+
         /// <summary>
         /// List of loaded files
         /// </summary>
@@ -26,21 +27,56 @@ namespace E3Packet
 
 
         /// <summary>
+        /// Load all Scripts to list and Show Folders
+        /// </summary>
+        /// <param name="listScriptFolders"></param>
+        /// <param name="listScripts"></param>
+        internal static void LoadScriptFolder(ref ListBox listScriptFolders, ref ListBox listScripts)
+        {
+            // Parse all scripts
+            LoadScripts(GlobalConfig.scriptsDirName);
+
+            var folderGroups = listScriptFileItems.GroupBy(f => f.DirectoryName).Select(g => g.Key).ToList();
+
+            listScriptFolders.DataSource = folderGroups;
+
+
+
+            //foreach (var ScriptFile in listScriptFileItems)
+            //{
+            //    // Add all folders to listScriptFolders
+            //    if (!(listScriptFolders.Items.Contains(ScriptFile))) //x => x.fullPath == ScriptFile.fullPath
+            //    {
+            //       // listScriptFolders.Items.Add((FolderItem)ScriptFile, CheckState.Unchecked);
+
+            //        listScriptFolders.DisplayMember = "directoryName";
+
+            //    }
+            //}
+
+            // Add only Scripts with Selected folder
+            FillScriptsFromSelectedFolders(listScriptFolders, listScripts);
+        }
+
+
+
+
+        /// <summary>
         /// Refresh opend files table in Form
         /// </summary>
         /// <param name="listOpendFiles"> Opend files table </param>
-        public static void RefreshForm(ref CheckedListBox listOpendFiles)
+        public static void RefreshForm(ref ListBox listOpendFiles)
         {
             // Get dictionari of running e3 process
             Dictionary<string, e3Application> e3ProcessDictionary = new Dictionary<string, e3Application>();
             e3ProcessDictionary = AppConnect.GetE3ProcessDictionary();
 
-            RemoveClosedFiles(e3ProcessDictionary, listOpendFiles);
+            //RemoveClosedFiles(e3ProcessDictionary, listOpendFiles);
 
             AddFilesFromProcess(e3ProcessDictionary, listOpendFiles);
 
-            AddBrowsedFiles(listOpendFiles);
-            
+            AddBrowsedFiles(ref listOpendFiles);
+
             listOpendFiles.Refresh();
             listOpendFiles.Size = new Size(100, 100);
         }
@@ -48,28 +84,27 @@ namespace E3Packet
         /// Adding new files from browsed files to Form
         /// </summary>
         /// <param name="listOpendFiles"></param>
-        private static void AddBrowsedFiles(CheckedListBox listOpendFiles)
+        private static void AddBrowsedFiles(ref ListBox listOpendFiles)
         {
-            foreach (var browsedFilePath in listFileItems)
-            {
-                if (!listOpendFiles.Items.Contains(browsedFilePath.fullPath))
-                {
-                    listOpendFiles.Items.Add(browsedFilePath.fullPath, browsedFilePath.ItemChecked ? CheckState.Checked : CheckState.Unchecked);
-                }
-            }
+            //foreach (var browsedFilePath in listFileItems)
+            //{
+            //if (!listOpendFiles.Items.Contains(browsedFilePath))
+            //{
+            // listOpendFiles.Items.Add(browsedFilePath, browsedFilePath.ItemSelected ? CheckState.Checked : CheckState.Unchecked);
+            listOpendFiles.DataSource = listFileItems;
+            //}
+            //}
         }
         /// <summary>
         /// Adding new files from processes to Form
         /// </summary>
         /// <param name="e3ProcessDictionary"></param>
         /// <param name="listOpendFiles"></param>
-        private static void AddFilesFromProcess(Dictionary<string, e3Application> e3ProcessDictionary, CheckedListBox listOpendFiles)
-        { 
+        private static void AddFilesFromProcess(Dictionary<string, e3Application> e3ProcessDictionary, ListBox listOpendFiles)
+        {
             foreach (var e3Process in e3ProcessDictionary)
             {
-                listOpendFiles.Items.Add(e3Process.Key);
-                //if (!listFileItems.Contains(new FileItem(e3Process.Key)))
-                if (!listFileItems.Any(x => x.fullPath == e3Process.Key))
+                if (!listFileItems.Any(x => x.FullPath == e3Process.Key))
                 {
                     listFileItems.Add(new FileItem(e3Process.Key));
                 }
@@ -80,134 +115,190 @@ namespace E3Packet
         /// </summary>
         /// <param name="e3ProcessDictionary"></param>
         /// <param name="listOpendFiles"></param>
-        private static void RemoveClosedFiles(Dictionary<string, e3Application> e3ProcessDictionary, CheckedListBox listOpendFiles)
-        {            
-            string[] opendFiles = listOpendFiles.Items.Cast<string>().ToArray();
-            foreach (var opendFile in opendFiles)
-            {
-                if (e3ProcessDictionary.ContainsKey(opendFile.ToString()))
-                {
-                    e3ProcessDictionary.Remove(opendFile.ToString());
-                }
-                else if (listFileItems.Select(x => x.shortFileName).Contains(opendFile.ToString()))
-                {
+        //private static void RemoveClosedFiles(Dictionary<string, e3Application> e3ProcessDictionary, ListBox listOpendFiles)
+        //{
+        //    for (int i = 0; i < listOpendFiles.Items.Count; i++)
+        //    {
+        //        if (e3ProcessDictionary.ContainsKey(listOpendFiles.Items[i].ToString()))
+        //        {
+        //            e3ProcessDictionary.Remove(listOpendFiles.Items[i].ToString());
+        //        }
+        //        else if (listFileItems.Select(x => x.fullPath).Contains(listOpendFiles.Items[i].ToString()))
+        //        {
 
-                }
-                else
+        //        }
+        //        else
+        //        {
+        //            //listFileItems.RemoveAt(i);
+        //        }
+        //    }
+        //}
+
+        internal static void FillScriptsFromSelectedFolders(ListBox listScriptFolders, ListBox listScripts)
+        {
+            if (listScriptFileItems != null)
+            {
+                var scriptFiles = listScriptFileItems.Where(s => listScriptFolders.SelectedItems.Contains(s.DirectoryName)).ToList();
+
+                listScripts.DataSource = scriptFiles;
+
+                if (listScripts.Items.Count > 0)
                 {
-                    listOpendFiles.Items.Remove(opendFile);
+                    for (int i = 0; i < listScripts.Items.Count; i++)
+                    {
+                        listScripts.SetSelected(i, listScriptFileItems.Where(s => s.DirectoryName == listScripts.Items[i].ToString()).Select(x => x.ItemSelected).FirstOrDefault());
+                    }
                 }
+
+
+                // listScripts.DataSource = listFileItems.Where(d => d.);
+
+                //foreach (var scriptFile in listScriptFileItems)
+                //{
+                //    foreach (var checkedFolder in listScriptFolders.SelectedItems)
+                //    {
+                //        if (scriptFile.directoryName == checkedFolder.ToString())
+                //        {
+                //            //  listScripts.Items.Add(scriptFile, scriptFile.ItemSelected ? CheckState.Checked : CheckState.Unchecked);                           
+                //            listScripts.DisplayMember = "shortScriptName";
+                //        }
+                //    }
+                //}
             }
         }
 
-        internal static void RunScripts(e3Application project)
+        internal static void RunScripts(e3Application project, ListBox.SelectedObjectCollection listScriptsSelectedItems)
         {
-            foreach (ScriptFileItem script in listScriptFileItems.Where(x => x.ItemChecked))
+            foreach (string script in listScriptsSelectedItems)
             {
                 RunScript(script, project);
             }
         }
 
-        private static void RunScript(ScriptFileItem script, e3Application project)
+        private static void RunScript(string script, e3Application project)
         {
-            project.Run(script.fullPath, "");
+            project.Run(script, "");
         }
 
 
+
         /// <summary>
-        /// Load choosed scripts in form 
+        /// Loads files in form
         /// </summary>
-        /// <param name="scriptNames"> Scripts to load </param>
-        /// <param name="availableScripts"> List of scripts in Form </param>
-        public static void LoadScripts(string[] scriptNames, ref CheckedListBox availableScripts)
+        /// <param name="folderName"> Folder from which to load </param>
+        public static void LoadFiles(string folderName, string extention = "*.e3s")
         {
-            foreach (string file in scriptNames)
-            {
-                if (!(listScriptFileItems.Any(s => s.fullPath == file)))
-                {
-                    listScriptFileItems.Add(new ScriptFileItem(file, GlobalConfig.scriptsDirName));
-                    availableScripts.Items.Add(listScriptFileItems.LastOrDefault().shortScriptName);
-                }
-            }
+            listFileItems.AddRange(GetFiles(folderName, extention));
         }
 
         /// <summary>
         /// Loads files in form
         /// </summary>
         /// <param name="folderName"> Folder from which to load </param>
-        public static void LoadFiles(string folderName)
+        public static void LoadScripts(string folderName, string extention = "*.vbs")
         {
-            string extention = "*.e3s";
-            listFileItems.AddRange(GetFiles(folderName, extention));
+            listScriptFileItems.AddRange(GetFiles(folderName, extention));
         }
 
         /// <summary>
         /// Starting Thread to open files and run scripts
         /// </summary>
-        /// <param name="fileItems"> Files to open </param>
-        public static void RunFile(List<FileItem> fileItems)
+        /// <param name="SelectedFiles"> Files to open </param>
+        public static void RunFile(ListBox.SelectedObjectCollection selectedFiles, ListBox.SelectedObjectCollection selectedScripts)
         {
-            if (fileItems != null)
+            if (selectedFiles != null)
             {
-                foreach (var file in fileItems)
+                foreach (var file in selectedFiles)
                 {
                     //Thread e3Thread = new Thread(new ThreadStart(file.Process));
                     //e3Thread.Start();
                     Task e3Task = Task.Run(() =>
                     {
                         Debug.WriteLine("Task={0}, obj={1}, Thread={2}",
-                              Task.CurrentId, file.fullPath,
+                              Task.CurrentId, file,
                                Thread.CurrentThread.ManagedThreadId);
-                        file.Process();
+                        Process(file.ToString(), selectedScripts);
                     });
                 }
             }
         }
 
-        internal static void SetCheckedFiles(CheckedListBox listOpendFiles)
+        /// <summary>
+        /// Open files and run scripts
+        /// </summary>
+        private static void Process(string file, ListBox.SelectedObjectCollection listScriptsSelectedItems)
+        {
+            // Open File
+            e3Application e3App = AppConnect.ToE3(file, out bool quitThenDone);
+            if (listScriptsSelectedItems.Count > 0)
+            {
+                FileLogic.RunScripts(e3App, listScriptsSelectedItems);
+            }
+
+            if (quitThenDone)
+            {
+                e3Job e3Prj = (e3Job)e3App.CreateJobObject();
+                e3Prj.Save();
+                e3Prj.Close();
+                e3App.Quit();
+            }
+        }
+
+        internal static void SetSelectedFiles(ListBox listOpendFiles)
         {
             if (listFileItems != null)
             {
-                foreach (var item in listFileItems)
+                foreach (var item in listOpendFiles.Items)
                 {
-                    item.ItemChecked = false;
+                    SetUnSelectedItem(ref listFileItems, item.ToString());
                 }
+
                 if (listOpendFiles != null)
                 {
-                    string[] checkedFiles = listOpendFiles.CheckedItems.Cast<string>().ToArray();
-                    foreach (var item in checkedFiles)
+                    var selectedFiles = listOpendFiles.SelectedItems;
+                    foreach (var item in selectedFiles)
                     {
-                        SetCheckedItem(ref listFileItems, item.ToString());
+                        SetSelectedItem(ref listFileItems, item.ToString());
                     }
                 }
             }
         }
 
-        internal static void SetCheckedScripts(CheckedListBox listAvailableScripts)
+        internal static void SetSelectedScripts(ListBox listAvailableScripts)
         {
-            if (listScriptFileItems != null)
+            if (listScriptFileItems != null && listAvailableScripts != null)
             {
-                foreach (var item in listScriptFileItems)
+
+                foreach (var item in listAvailableScripts.Items)
                 {
-                    item.ItemChecked = false;
+                    SetUnSelectedItem(ref listScriptFileItems, ((ScriptFileItem)item).FullPath);
                 }
-                if (listAvailableScripts != null)
-                {
-                    foreach (var item in listAvailableScripts.CheckedItems)
+
+                foreach (var item in listAvailableScripts.SelectedItems)
                     {
-                        SetCheckedItem(ref listScriptFileItems, item.ToString());
+                        SetSelectedItem(ref listScriptFileItems, ((ScriptFileItem)item).FullPath);
                     }
-                }
+                
             }
         }
 
-        private static void SetCheckedItem<T>(ref List<T> fileItems, string selectedItem) where T : FolderItem
+        private static void SetSelectedItem<T>(ref List<T> fileItems, string SelectedItem) where T : FolderItem
         {
             foreach (var item in fileItems)
             {
-                if (item.fullPath == selectedItem)
+                if (item.FullPath == SelectedItem)
                 {
-                    item.ItemChecked = true;
+                    item.ItemSelected = true;
+                }
+            }
+        }
+        private static void SetUnSelectedItem<T>(ref List<T> fileItems, string unSelectedItem) where T : FolderItem
+        {
+            foreach (var item in fileItems)
+            {
+                if (item.FullPath == unSelectedItem)
+                {
+                    item.ItemSelected = false;
                 }
             }
         }
@@ -224,10 +315,7 @@ namespace E3Packet
                 foreach (string dir in dirs)
                 {
                     Debug.WriteLine(dir);
-                    // listFolderItems.Add(new FolderItem(dir));
-                    //listFolderItems.Last().ItemChecked = true;
-                    // Do not include this directories
-                    // if (listAvailableFolders.CheckedItems.Contains(Path.GetFileName(dir)))
+
                     if (true)
                     {
                         filePaths.AddRange(GetSubFiles(dir, extention));
@@ -245,10 +333,10 @@ namespace E3Packet
             foreach (string s in files)
             {
                 Debug.WriteLine(s);
-                // if (!listFileItems.Contains(new ScriptFileItem(s, dirName)))
-                if (!listFileItems.Any(x => x.fullPath == s) && !listScriptFileItems.Any(x => x.fullPath == s))
+
+                if (!listFileItems.Any(x => x.FullPath == s) && !listScriptFileItems.Any(x => x.FullPath == s))
                 {
-                    filePaths.Add(new ScriptFileItem(s, dirName));
+                    filePaths.Add(new ScriptFileItem(s));
                 }
             }
             return filePaths;

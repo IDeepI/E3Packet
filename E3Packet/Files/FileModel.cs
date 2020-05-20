@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace E3Packet
 {
@@ -14,15 +15,27 @@ namespace E3Packet
         /// <summary>
         /// Path to Item
         /// </summary>
-        public string fullPath;
+        private string fullPath;
+        public string FullPath { 
+            get 
+            {
+                return fullPath;
+            }
+        }
         /// <summary>
         /// Name of upper dirrectory
         /// </summary>
-        public string directoryName;
+        private string directoryName;
+        public string DirectoryName {
+            get
+            {
+                return directoryName;
+            }
+        }
         /// <summary>
         /// True if item selected
         /// </summary>
-        public bool ItemChecked { get; set; }
+        public bool ItemSelected { get; set; }
 
         public FolderItem() : this("Неизвестно")
         {
@@ -44,54 +57,45 @@ namespace E3Packet
         /// <summary>
         /// Name to use in List
         /// </summary>
-        public string shortFileName;
-        public FileItem(string path) : base(path)
+        private string shortFileName;
+        public string ShortFileName
         {
-        }
+            get
+            {
+                return shortFileName;
+            }
+        }       
         /// <summary>
         /// File data.
         /// </summary>
         /// <param name="path">Full path</param>
         /// <param name="scriptsDirName">Exclude it from shortFileName</param>
-        public FileItem(string path, string scriptsDirName) : base(path)
+        public FileItem(string path) : base(path)
         {
-            this.shortFileName = directoryName + Path.GetFileName(scriptsDirName);
-        }
-
-        /// <summary>
-        /// Open files and run scripts
-        /// </summary>
-        internal void Process()
-        {
-            // Open File
-            e3Application project = AppConnect.ToE3(fullPath, out bool quitThenDone);
-            if (FileLogic.listScriptFileItems.Any(x => x.ItemChecked))
-            {
-                FileLogic.RunScripts(project);
-            }
-           
-            if (quitThenDone)
-            {
-                project.Quit();
-            }
-        } 
-       
+            this.shortFileName = Path.GetFileName(path);
+        }       
     }
     public class ScriptFileItem : FileItem
     {
         /// <summary>
         /// Name to use in List
         /// </summary>
-        public string shortScriptName;
-
+        private string shortScriptName;
+        public string ShortScriptName
+        {
+            get
+            {
+                return shortScriptName;
+            }
+        }
         /// <summary>
         /// Script File Data
         /// </summary>
         /// <param name="path">Full path</param>
         /// <param name="scriptsDirName">Exclude it from shortFileName</param>
-        public ScriptFileItem(string path, string scriptsDirName) : base(path)
+        public ScriptFileItem(string path) : base(path)
         {
-            this.shortScriptName = path.Replace(scriptsDirName, "");
+            this.shortScriptName = Path.GetFileNameWithoutExtension(path);
         }
     }
 }

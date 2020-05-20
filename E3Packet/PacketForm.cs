@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel.Design;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -10,24 +12,35 @@ namespace E3Packet
         public PacketForm()
         {
             InitializeComponent();
+
+            listFiles.AutoSize = true;
+            listScriptFolders.AutoSize = true;
+            listScripts.AutoSize = true;
+
+            listFiles.Sorted = true;
+            listScriptFolders.Sorted = true;
+            listScripts.Sorted = true;
+
+            listFiles.DisplayMember = "FullPath";
+            //listScriptFolders.DisplayMember = "DirectoryName";
+            listScripts.DisplayMember = "ShortScriptName";
+
+            listFiles.ValueMember = "fullPath";
+            //listScriptFolders.ValueMember = "Name";
+            listScripts.ValueMember = "fullPath";
+
+            this.AutoSize = true;
         }
 
         private void PacketForm_Load(object sender, EventArgs e)
         {
             FileLogic.RefreshForm(ref listFiles);
             for (int i = 0; i < listFiles.Items.Count; i++)
-                listFiles.SetItemCheckState(i, CheckState.Checked);
+                listFiles.SetSelected(i, true);
 
-            listFiles.AutoSize = true;
-            listScripts.AutoSize = true;
-
-            listFiles.Sorted = true;
-            listScripts.Sorted = true;
-
-            this.AutoSize = true;
-
-            FileLogic.SetCheckedFiles(listFiles);
-            FileLogic.SetCheckedScripts(listScripts);
+            FileLogic.LoadScriptFolder(ref listScriptFolders, ref listScripts);
+            FileLogic.SetSelectedFiles(listFiles);
+            FileLogic.SetSelectedScripts(listScripts);
         }
 
 
@@ -41,7 +54,7 @@ namespace E3Packet
             string folderName;
 
             // choose active project path
-            folderName = listFiles?.CheckedItems[0]?.ToString();
+            folderName = listFiles?.SelectedItems[0]?.ToString();
             filesBrowserDialog.SelectedPath = Directory.GetParent(folderName ?? GlobalConfig.filesDirName).ToString();
             // Show the FolderBrowserDialog
             DialogResult result = filesBrowserDialog.ShowDialog();
@@ -60,7 +73,7 @@ namespace E3Packet
             FileLogic.RefreshForm(ref listFiles);
         }
 
-        private void BrowseForScripts_Click(object sender, EventArgs e)
+      /*  private void BrowseForScripts_Click(object sender, EventArgs e)
         {
             openScriptDialog.Filter = "Scripts (*.vbs;*.exe)|*.vbs;*.exe";
             openScriptDialog.Multiselect = true;
@@ -76,22 +89,12 @@ namespace E3Packet
                 FileLogic.LoadScripts(openScriptDialog.FileNames, ref listScripts);
                 FileLogic.RefreshForm(ref listFiles);
             }
-        }
+        }*/
 
         private void RunExecution_Click(object sender, EventArgs e)
         {
             // Run selected files            
-            FileLogic.RunFile(FileLogic.listFileItems.Where(x => x.ItemChecked).ToList());
-        }
-
-        private void listOpendFiles_SelectedValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void listAvailableScripts_SelectedValueChanged(object sender, EventArgs e)
-        {
-
+            FileLogic.RunFile(listFiles.SelectedItems, listScripts.SelectedItems);
         }
 
         private void CancelExecution_Click(object sender, EventArgs e)
@@ -104,7 +107,7 @@ namespace E3Packet
             string folderName;
 
             // choose active project path
-            string[] folderNameItems = listFiles.CheckedItems.Cast<string>().ToArray();
+            string[] folderNameItems = listFiles.SelectedItems.Cast<string>().ToArray();
             foreach (string folderNameItem in folderNameItems)
             {
                 folderName = Directory.GetParent(folderNameItem).ToString();
@@ -112,27 +115,39 @@ namespace E3Packet
             }
         }
 
-        private void listOpendFiles_ItemCheck(object sender, ItemCheckEventArgs e)
-        {
-            this.BeginInvoke(
-                (MethodInvoker)
-                (() => FileLogic.SetCheckedFiles(listFiles))
-                );
-        }
-
-        private void listAvailableScripts_ItemCheck(object sender, ItemCheckEventArgs e)
-        {
-            FileLogic.SetCheckedScripts(listScripts);
-        }
+      
 
         private void refreshFormButton_Click(object sender, EventArgs e)
         {
             FileLogic.RefreshForm(ref listFiles);
         }
 
-        private void listAvailableScripts_SelectedIndexChanged(object sender, EventArgs e)
+        private void listScripts_SelectedIndexChanged(object sender, EventArgs e)
         {
+            this.BeginInvoke(
+               (MethodInvoker)
+               (() => FileLogic.SetSelectedScripts(listScripts))
+               );
+        }
 
+        private void listScriptFolders_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            this.BeginInvoke(
+                (MethodInvoker)
+                (() => FileLogic.FillScriptsFromSelectedFolders(listScriptFolders, listScripts))
+                );
+
+            FileLogic.RefreshForm(ref listFiles);
+            listScripts.Refresh();
+            listScripts.Size = new Size(100, 100);
+        }
+
+        private void listFiles_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            this.BeginInvoke(
+                (MethodInvoker)
+                (() => FileLogic.SetSelectedFiles(listFiles))
+                );
         }
     }
 }

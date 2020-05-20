@@ -29,35 +29,21 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PacketForm));
-            this.listFiles = new System.Windows.Forms.CheckedListBox();
             this.fileLable = new System.Windows.Forms.Label();
             this.scriptFoldersLable = new System.Windows.Forms.Label();
             this.RunExecution = new System.Windows.Forms.Button();
             this.CancelExecution = new System.Windows.Forms.Button();
             this.BrowseForFiles = new System.Windows.Forms.Button();
-            this.BrowseForScripts = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.listScriptFolders = new System.Windows.Forms.CheckedListBox();
+            this.listScripts = new System.Windows.Forms.ListBox();
+            this.listScriptFolders = new System.Windows.Forms.ListBox();
             this.scriptsLable = new System.Windows.Forms.Label();
+            this.listFiles = new System.Windows.Forms.ListBox();
             this.refreshFormButton = new System.Windows.Forms.Button();
             this.AddSeletedFileFolderButton = new System.Windows.Forms.Button();
-            this.listScripts = new System.Windows.Forms.CheckedListBox();
-            this.openScriptDialog = new System.Windows.Forms.OpenFileDialog();
             this.filesBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // listFiles
-            // 
-            this.listFiles.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listFiles.FormattingEnabled = true;
-            this.listFiles.Location = new System.Drawing.Point(3, 16);
-            this.listFiles.MinimumSize = new System.Drawing.Size(251, 251);
-            this.listFiles.Name = "listFiles";
-            this.listFiles.Size = new System.Drawing.Size(256, 260);
-            this.listFiles.TabIndex = 0;
-            this.listFiles.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.listOpendFiles_ItemCheck);
-            this.listFiles.SelectedValueChanged += new System.EventHandler(this.listOpendFiles_SelectedValueChanged);
             // 
             // fileLable
             // 
@@ -80,7 +66,7 @@
             // RunExecution
             // 
             this.RunExecution.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.RunExecution.Location = new System.Drawing.Point(527, 322);
+            this.RunExecution.Location = new System.Drawing.Point(527, 128);
             this.RunExecution.Name = "RunExecution";
             this.RunExecution.Size = new System.Drawing.Size(256, 34);
             this.RunExecution.TabIndex = 8;
@@ -91,7 +77,7 @@
             // CancelExecution
             // 
             this.CancelExecution.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.CancelExecution.Location = new System.Drawing.Point(527, 362);
+            this.CancelExecution.Location = new System.Drawing.Point(527, 168);
             this.CancelExecution.Name = "CancelExecution";
             this.CancelExecution.Size = new System.Drawing.Size(256, 34);
             this.CancelExecution.TabIndex = 9;
@@ -102,24 +88,13 @@
             // BrowseForFiles
             // 
             this.BrowseForFiles.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.BrowseForFiles.Location = new System.Drawing.Point(3, 282);
+            this.BrowseForFiles.Location = new System.Drawing.Point(3, 128);
             this.BrowseForFiles.Name = "BrowseForFiles";
             this.BrowseForFiles.Size = new System.Drawing.Size(256, 34);
             this.BrowseForFiles.TabIndex = 12;
             this.BrowseForFiles.Text = "Browse for files";
             this.BrowseForFiles.UseVisualStyleBackColor = true;
             this.BrowseForFiles.Click += new System.EventHandler(this.BrowseForFiles_Click);
-            // 
-            // BrowseForScripts
-            // 
-            this.BrowseForScripts.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.BrowseForScripts.Location = new System.Drawing.Point(527, 282);
-            this.BrowseForScripts.Name = "BrowseForScripts";
-            this.BrowseForScripts.Size = new System.Drawing.Size(256, 34);
-            this.BrowseForScripts.TabIndex = 12;
-            this.BrowseForScripts.Text = "Browse for Scripts";
-            this.BrowseForScripts.UseVisualStyleBackColor = true;
-            this.BrowseForScripts.Click += new System.EventHandler(this.BrowseForScripts_Click);
             // 
             // tableLayoutPanel1
             // 
@@ -129,16 +104,15 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.Controls.Add(this.listScriptFolders, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.listScripts, 2, 1);
+            this.tableLayoutPanel1.Controls.Add(this.listScriptFolders, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.scriptsLable, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.listFiles, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.refreshFormButton, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.AddSeletedFileFolderButton, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.listScripts, 2, 1);
-            this.tableLayoutPanel1.Controls.Add(this.listFiles, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.fileLable, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.scriptFoldersLable, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.BrowseForFiles, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.BrowseForScripts, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.RunExecution, 2, 2);
             this.tableLayoutPanel1.Controls.Add(this.CancelExecution, 2, 3);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
@@ -149,19 +123,30 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(786, 399);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(786, 245);
             this.tableLayoutPanel1.TabIndex = 13;
+            // 
+            // listScripts
+            // 
+            this.listScripts.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listScripts.FormattingEnabled = true;
+            this.listScripts.Location = new System.Drawing.Point(527, 16);
+            this.listScripts.Name = "listScripts";
+            this.listScripts.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.listScripts.Size = new System.Drawing.Size(256, 106);
+            this.listScripts.TabIndex = 17;
+            this.listScripts.SelectedIndexChanged += new System.EventHandler(this.listScripts_SelectedIndexChanged);
             // 
             // listScriptFolders
             // 
             this.listScriptFolders.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listScriptFolders.FormattingEnabled = true;
-            this.listScriptFolders.Location = new System.Drawing.Point(265, 282);
-            this.listScriptFolders.MaximumSize = new System.Drawing.Size(1000, 750);
-            this.listScriptFolders.MinimumSize = new System.Drawing.Size(251, 251);
+            this.listScriptFolders.Location = new System.Drawing.Point(265, 16);
             this.listScriptFolders.Name = "listScriptFolders";
-            this.listScriptFolders.Size = new System.Drawing.Size(256, 251);
-            this.listScriptFolders.TabIndex = 17;
+            this.listScriptFolders.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.listScriptFolders.Size = new System.Drawing.Size(256, 106);
+            this.listScriptFolders.TabIndex = 15;
+            this.listScriptFolders.SelectedIndexChanged += new System.EventHandler(this.listScriptFolders_SelectedIndexChanged);
             // 
             // scriptsLable
             // 
@@ -172,41 +157,38 @@
             this.scriptsLable.TabIndex = 16;
             this.scriptsLable.Text = "Scripts";
             // 
+            // listFiles
+            // 
+            this.listFiles.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listFiles.FormattingEnabled = true;
+            this.listFiles.Location = new System.Drawing.Point(3, 16);
+            this.listFiles.Name = "listFiles";
+            this.listFiles.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.listFiles.Size = new System.Drawing.Size(256, 106);
+            this.listFiles.TabIndex = 14;
+            this.listFiles.SelectedIndexChanged += new System.EventHandler(this.listFiles_SelectedIndexChanged);
+            // 
             // refreshFormButton
             // 
             this.refreshFormButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.refreshFormButton.Location = new System.Drawing.Point(3, 362);
+            this.refreshFormButton.Location = new System.Drawing.Point(265, 208);
             this.refreshFormButton.Name = "refreshFormButton";
             this.refreshFormButton.Size = new System.Drawing.Size(256, 34);
             this.refreshFormButton.TabIndex = 15;
-            this.refreshFormButton.Text = "Refresh form";
+            this.refreshFormButton.Text = "Refresh Form";
             this.refreshFormButton.UseVisualStyleBackColor = true;
             this.refreshFormButton.Click += new System.EventHandler(this.refreshFormButton_Click);
             // 
             // AddSeletedFileFolderButton
             // 
             this.AddSeletedFileFolderButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.AddSeletedFileFolderButton.Location = new System.Drawing.Point(3, 322);
+            this.AddSeletedFileFolderButton.Location = new System.Drawing.Point(3, 168);
             this.AddSeletedFileFolderButton.Name = "AddSeletedFileFolderButton";
             this.AddSeletedFileFolderButton.Size = new System.Drawing.Size(256, 34);
             this.AddSeletedFileFolderButton.TabIndex = 14;
             this.AddSeletedFileFolderButton.Text = "Add seleted file folder";
             this.AddSeletedFileFolderButton.UseVisualStyleBackColor = true;
             this.AddSeletedFileFolderButton.Click += new System.EventHandler(this.AddSeletedFileFolderButton_Click);
-            // 
-            // listScripts
-            // 
-            this.listScripts.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listScripts.FormattingEnabled = true;
-            this.listScripts.Location = new System.Drawing.Point(527, 16);
-            this.listScripts.MaximumSize = new System.Drawing.Size(1000, 750);
-            this.listScripts.MinimumSize = new System.Drawing.Size(251, 251);
-            this.listScripts.Name = "listScripts";
-            this.listScripts.Size = new System.Drawing.Size(256, 260);
-            this.listScripts.TabIndex = 13;
-            this.listScripts.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.listAvailableScripts_ItemCheck);
-            this.listScripts.SelectedIndexChanged += new System.EventHandler(this.listAvailableScripts_SelectedIndexChanged);
-            this.listScripts.SelectedValueChanged += new System.EventHandler(this.listAvailableScripts_SelectedValueChanged);
             // 
             // filesBrowserDialog
             // 
@@ -243,16 +225,14 @@
         private System.Windows.Forms.Button RunExecution;
         private System.Windows.Forms.Button CancelExecution;
         private System.Windows.Forms.Button BrowseForFiles;
-        private System.Windows.Forms.Button BrowseForScripts;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        public System.Windows.Forms.CheckedListBox listFiles;
-        public System.Windows.Forms.CheckedListBox listScripts;
-        private System.Windows.Forms.OpenFileDialog openScriptDialog;
         private System.Windows.Forms.FolderBrowserDialog filesBrowserDialog;
         private System.Windows.Forms.Button AddSeletedFileFolderButton;
         private System.Windows.Forms.Button refreshFormButton;
         private System.Windows.Forms.Label scriptsLable;
-        public System.Windows.Forms.CheckedListBox listScriptFolders;
+        private System.Windows.Forms.ListBox listFiles;
+        private System.Windows.Forms.ListBox listScriptFolders;
+        private System.Windows.Forms.ListBox listScripts;
     }
 }
 
