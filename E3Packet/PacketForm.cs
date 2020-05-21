@@ -12,36 +12,33 @@ namespace E3Packet
         {
             InitializeComponent();
 
-            listFiles.AutoSize = true;
-            listScriptFolders.AutoSize = true;
-            listScripts.AutoSize = true;
+            filesListBox.AutoSize = true;
+            scriptsToSelectFromListBox.AutoSize = true;
+           
+            filesListBox.Sorted = true;
+            scriptsToSelectFromListBox.Sorted = true;
+            
 
-            listFiles.Sorted = true;
-            listScriptFolders.Sorted = true;
-            listScripts.Sorted = true;
+            filesListBox.DisplayMember = "FullPath";
+            scriptsToSelectFromListBox.DisplayMember = "ShortScriptName";
 
-            listFiles.DisplayMember = "FullPath";
-            //listScriptFolders.DisplayMember = "DirectoryName";
-            listScripts.DisplayMember = "ShortScriptName";
-
-            listFiles.ValueMember = "fullPath";
-            //listScriptFolders.ValueMember = "Name";
-            listScripts.ValueMember = "fullPath";
+            filesListBox.ValueMember = "FullPath";
+            scriptsToSelectFromListBox.ValueMember = "FullPath";
 
             this.AutoSize = true;
         }
 
         private void PacketForm_Load(object sender, EventArgs e)
         {
-            FileLogic.RefreshForm(ref listFiles);
-            for (int i = 0; i < listFiles.Items.Count; i++)
-                listFiles.SetSelected(i, true);
+            FileLogic.RefreshForm(ref filesListBox);            
 
-            FileLogic.LoadScriptFolder(ref listScriptFolders, ref listScripts);
-            FileLogic.SetSelectedFiles(listFiles);
-            FileLogic.SetSelectedScripts(listScripts);
+            for (int i = 0; i < filesListBox.Items.Count; i++)
+                filesListBox.SetSelected(i, true);
+
+            FileLogic.SetSelectedFiles(filesListBox);
+
+            SelectAvailableScripts();
         }
-
 
         private void PacketForm_MouseMove(object sender, MouseEventArgs e)
         {
@@ -53,7 +50,7 @@ namespace E3Packet
             string folderName;
 
             // choose active project path
-            folderName = listFiles?.SelectedItems[0]?.ToString();
+            folderName = ((FileItem)(filesListBox.SelectedItems[0]))?.FullPath;
             filesBrowserDialog.SelectedPath = Directory.GetParent(folderName ?? GlobalConfig.filesDirName).ToString();
             // Show the FolderBrowserDialog
             DialogResult result = filesBrowserDialog.ShowDialog();
@@ -69,31 +66,13 @@ namespace E3Packet
         {
             FileLogic.LoadFiles(folderName);
 
-            FileLogic.RefreshForm(ref listFiles);
+            FileLogic.RefreshForm(ref filesListBox);
         }
-
-        /*  private void BrowseForScripts_Click(object sender, EventArgs e)
-          {
-              openScriptDialog.Filter = "Scripts (*.vbs;*.exe)|*.vbs;*.exe";
-              openScriptDialog.Multiselect = true;
-              openScriptDialog.InitialDirectory = GlobalConfig.scriptsDirName;
-
-              openScriptDialog.FilterIndex = 2;
-              openScriptDialog.RestoreDirectory = true;
-
-              // Show the FolderBrowserDialog
-              DialogResult result = openScriptDialog.ShowDialog();
-              if (result == DialogResult.OK)
-              {
-                  FileLogic.LoadScripts(openScriptDialog.FileNames, ref listScripts);
-                  FileLogic.RefreshForm(ref listFiles);
-              }
-          }*/
-
+                
         private void RunExecution_Click(object sender, EventArgs e)
         {
             // Run selected files            
-            FileLogic.RunFile(listFiles.SelectedItems, listScripts.SelectedItems);
+            FileLogic.RunFile(filesListBox, scriptsToSelectFromListBox);
         }
 
         private void CancelExecution_Click(object sender, EventArgs e)
@@ -101,15 +80,16 @@ namespace E3Packet
             this.Close();
         }
 
+       
+
         private void AddSeletedFileFolderButton_Click(object sender, EventArgs e)
         {
             string folderName;
 
-            // choose active project path
-            string[] folderNameItems = listFiles.SelectedItems.Cast<string>().ToArray();
-            foreach (string folderNameItem in folderNameItems)
+            // choose active project path            
+            foreach (var folderNameItem in filesListBox.SelectedItems)
             {
-                folderName = Directory.GetParent(folderNameItem).ToString();
+                folderName = Directory.GetParent(((FileItem)folderNameItem).FullPath).ToString();
                 GetFiles(folderName);
             }
         }
@@ -118,29 +98,29 @@ namespace E3Packet
 
         private void refreshFormButton_Click(object sender, EventArgs e)
         {
-            FileLogic.RefreshForm(ref listFiles);
+            FileLogic.RefreshForm(ref filesListBox);
         }
 
-        public void listScripts_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (FileLogic.ignoreSelectedIndexChanged == false)
-            {
-                FileLogic.SetSelectedScripts(listScripts);
-            }          
-        }
-
-        private void listScriptFolders_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            FileLogic.FillScriptsFromSelectedFolders(listScriptFolders, listScripts);
-
-            FileLogic.RefreshForm(ref listFiles);
-            listScripts.Refresh();
-            listScripts.Size = new Size(100, 100);
-        }
-
+       
         private void listFiles_SelectedIndexChanged(object sender, EventArgs e)
         {
-            FileLogic.SetSelectedFiles(listFiles);
+            FileLogic.SetSelectedFiles(filesListBox);
+        }
+
+        private void addAvailableScriptsButton_Click(object sender, EventArgs e)
+        {
+            SelectAvailableScripts();            
+        }
+
+        private void SelectAvailableScripts() 
+        {
+            Form availableScriptsForm = new AvailableScriptsForm(this);
+            availableScriptsForm.ShowDialog();
+        }
+
+        public void AddAvailableScripts()
+        {
+            FileLogic.FillAvailableScripts(scriptsToSelectFromListBox);
         }
     }
 }

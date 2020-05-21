@@ -1,11 +1,13 @@
 ﻿using ConnectToE3;
 using e3;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -30,9 +32,9 @@ namespace E3Packet
         /// <summary>
         /// Load all Scripts to list and Show Folders
         /// </summary>
-        /// <param name="listScriptFolders"></param>
-        /// <param name="listScripts"></param>
-        internal static void LoadScriptFolder(ref ListBox listScriptFolders, ref ListBox listScripts)
+        /// <param name="scriptFoldersListBox"></param>
+        /// <param name="scriptsListBox"></param>
+        internal static void LoadScriptFolder(ref ListBox scriptFoldersListBox, ref ListBox scriptsListBox)
         {
             // Parse all scripts
             LoadScripts(GlobalConfig.scriptsDirName);
@@ -40,35 +42,32 @@ namespace E3Packet
             var folderGroups = listScriptFileItems.GroupBy(f => f.DirectoryName).Select(g => g.Key).ToList();
 
             // Get the current selection mode
-            SelectionMode selectionMode = listScriptFolders.SelectionMode;
+            SelectionMode selectionMode = scriptFoldersListBox.SelectionMode;
 
             // Set the selection mode to none
-            listScriptFolders.SelectionMode = SelectionMode.None;
+            scriptFoldersListBox.SelectionMode = SelectionMode.None;
 
             // Set a new DataSource
-            listScriptFolders.DataSource = folderGroups;
+            scriptFoldersListBox.DataSource = folderGroups;
 
             // Set back the original selection mode
-            listScriptFolders.SelectionMode = selectionMode; 
+            scriptFoldersListBox.SelectionMode = selectionMode; 
 
             //foreach (var ScriptFile in listScriptFileItems)
             //{
-            //    // Add all folders to listScriptFolders
-            //    if (!(listScriptFolders.Items.Contains(ScriptFile))) //x => x.fullPath == ScriptFile.fullPath
+            //    // Add all folders to scriptFoldersListBox
+            //    if (!(scriptFoldersListBox.Items.Contains(ScriptFile))) //x => x.fullPath == ScriptFile.fullPath
             //    {
-            //       // listScriptFolders.Items.Add((FolderItem)ScriptFile, CheckState.Unchecked);
+            //       // scriptFoldersListBox.Items.Add((FolderItem)ScriptFile, CheckState.Unchecked);
 
-            //        listScriptFolders.DisplayMember = "directoryName";
+            //        scriptFoldersListBox.DisplayMember = "directoryName";
 
             //    }
             //}
 
             // Add only Scripts with Selected folder
-            FillScriptsFromSelectedFolders(listScriptFolders, listScripts);
+            FillScriptsFromSelectedFolders(scriptFoldersListBox, scriptsListBox);
         }
-
-
-
 
         /// <summary>
         /// Refresh opend files table in Form
@@ -82,36 +81,48 @@ namespace E3Packet
 
             //RemoveClosedFiles(e3ProcessDictionary, listOpendFiles);
 
-            AddFilesFromProcess(e3ProcessDictionary, listOpendFiles);
+            AddFilesFromProcess(e3ProcessDictionary);
 
             AddBrowsedFiles(ref listOpendFiles);
 
             listOpendFiles.Refresh();
             listOpendFiles.Size = new Size(100, 100);
         }
+
         /// <summary>
         /// Adding new files from browsed files to Form
         /// </summary>
         /// <param name="listOpendFiles"></param>
-        private static void AddBrowsedFiles(ref ListBox listOpendFiles)
-        {           
+        public static void AddBrowsedFiles(ref ListBox listOpendFiles)
+        {
             // Set a new DataSource
-            listOpendFiles.DataSource = listFileItems;          
+            BindingSource bs = new BindingSource();
+            bs.DataSource = listFileItems;
+            listOpendFiles.DataSource = bs;
+            bs.ResetBindings(false);
         }
         /// <summary>
         /// Adding new files from processes to Form
         /// </summary>
         /// <param name="e3ProcessDictionary"></param>
         /// <param name="listOpendFiles"></param>
-        private static void AddFilesFromProcess(Dictionary<string, e3Application> e3ProcessDictionary, ListBox listOpendFiles)
+        private static void AddFilesFromProcess(Dictionary<string, e3Application> e3ProcessDictionary)
         {
             foreach (var e3Process in e3ProcessDictionary)
             {
                 if (!listFileItems.Any(x => x.FullPath == e3Process.Key))
                 {
-                    listFileItems.Add(new FileItem(e3Process.Key));
+                    listFileItems.Add(new ScriptFileItem(e3Process.Key));
                 }
             }
+        }
+
+        internal static void FillAvailableScripts(ListBox scriptsToSelectFromListBox)
+        {
+            // Make DataSource for listbox with Scripts
+            var scriptFiles = listScriptFileItems.Where(s => s.ItemSelected).ToList();
+            // Set a new DataSource
+            scriptsToSelectFromListBox.DataSource = scriptFiles;
         }
 
         /// <summary>
@@ -138,31 +149,31 @@ namespace E3Packet
         //    }
         //}
 
-        internal static void FillScriptsFromSelectedFolders(ListBox listScriptFolders, ListBox listScripts)
+        internal static void FillScriptsFromSelectedFolders(ListBox scriptFoldersListBox, ListBox scriptsListBox)
         {
             if (listScriptFileItems != null)
             {
                 // Make DataSource for listbox with Scripts
-                var scriptFiles = listScriptFileItems.Where(s => listScriptFolders.SelectedItems.Contains(s.DirectoryName)).ToList();
+                var scriptFiles = listScriptFileItems.Where(s => scriptFoldersListBox.SelectedItems.Contains(s.DirectoryName)).ToList();
 
                 ignoreSelectedIndexChanged = true;
 
                 // Set a new DataSource
-                listScripts.DataSource = scriptFiles;
+                scriptsListBox.DataSource = scriptFiles;
 
-                listScripts.SelectedIndex = -1; // This optional line keeps the first item from being selected.                
+                scriptsListBox.SelectedIndex = -1; // This optional line keeps the first item from being selected.                
 
-                if (listScripts.Items.Count > 0)
+                if (scriptsListBox.Items.Count > 0)
                 {
-                    for (int i = 0; i < listScripts.Items.Count; i++)
+                    for (int i = 0; i < scriptsListBox.Items.Count; i++)
                     {
-                        string selectedItemFullPath = ((ScriptFileItem)listScripts.Items[i]).FullPath;
+                        string selectedItemFullPath = ((ScriptFileItem)scriptsListBox.Items[i]).FullPath;
 
                         bool selected = (from ScriptFile in listScriptFileItems
                                          where ScriptFile.FullPath == selectedItemFullPath
                                          select ScriptFile.ItemSelected).First();
 
-                        listScripts.SetSelected(i, selected);
+                        scriptsListBox.SetSelected(i, selected);
                     }
                 }
 
@@ -170,9 +181,9 @@ namespace E3Packet
             }
         }
 
-        internal static void RunScripts(e3Application project, ListBox.SelectedObjectCollection listScriptsSelectedItems)
+        internal static void RunScripts(e3Application project, List<string> scriptsListBoxSelectedItems)
         {
-            foreach (string script in listScriptsSelectedItems)
+            foreach (string script in scriptsListBoxSelectedItems)
             {
                 RunScript(script, project);
             }
@@ -207,20 +218,29 @@ namespace E3Packet
         /// Starting Thread to open files and run scripts
         /// </summary>
         /// <param name="SelectedFiles"> Files to open </param>
-        public static void RunFile(ListBox.SelectedObjectCollection selectedFiles, ListBox.SelectedObjectCollection selectedScripts)
+        public static void RunFile(ListBox selectedFiles, ListBox selectedScripts)
         {
-            if (selectedFiles != null)
+            if (selectedFiles.SelectedItems != null)
             {
-                foreach (var file in selectedFiles)
+                foreach (var file in selectedFiles.SelectedItems)
                 {
                     //Thread e3Thread = new Thread(new ThreadStart(file.Process));
                     //e3Thread.Start();
-                    Task e3Task = Task.Run(() =>
+
+                    string filePath = ((FileItem)file).FullPath;
+
+                    List<string> scriptsToExecute = new List<string>();
+                    foreach (ScriptFileItem selectedScript in selectedScripts.SelectedItems)
                     {
+                        scriptsToExecute.Add(selectedScript.FullPath);
+                    }
+                   
+                    Task e3Task = Task.Run(() =>
+                    {                        
                         Debug.WriteLine("Task={0}, obj={1}, Thread={2}",
-                              Task.CurrentId, file,
+                              Task.CurrentId, filePath,
                                Thread.CurrentThread.ManagedThreadId);
-                        Process(file.ToString(), selectedScripts);
+                        Process(filePath.ToString(), scriptsToExecute);
                     });
                 }
             }
@@ -229,13 +249,14 @@ namespace E3Packet
         /// <summary>
         /// Open files and run scripts
         /// </summary>
-        private static void Process(string file, ListBox.SelectedObjectCollection listScriptsSelectedItems)
+        private static void Process(string file, List<string> scriptsListBoxSelectedItems)
         {
             // Open File
             e3Application e3App = AppConnect.ToE3(file, out bool quitThenDone);
-            if (listScriptsSelectedItems.Count > 0)
+
+            if (scriptsListBoxSelectedItems.Count > 0)
             {
-                FileLogic.RunScripts(e3App, listScriptsSelectedItems);
+                FileLogic.RunScripts(e3App, scriptsListBoxSelectedItems);
             }
 
             if (quitThenDone)
@@ -313,11 +334,11 @@ namespace E3Packet
             {
                 filePaths.AddRange(GetSubFiles(dirName, extention));
 
-                Debug.WriteLine("Подкаталоги:");
+                //Debug.WriteLine("Подкаталоги:");
                 string[] dirs = Directory.GetDirectories(dirName);
                 foreach (string dir in dirs)
                 {
-                    Debug.WriteLine(dir);
+                   // Debug.WriteLine(dir);
 
                     if (true)
                     {
@@ -331,13 +352,15 @@ namespace E3Packet
         private static List<ScriptFileItem> GetSubFiles(string dirName, string extention)
         {
             List<ScriptFileItem> filePaths = new List<ScriptFileItem>();
-            Debug.WriteLine("Файлы:");
+            // Debug.WriteLine("Файлы:");
             string[] files = Directory.GetFiles(dirName, extention);
             foreach (string s in files)
             {
-                Debug.WriteLine(s);
+               // Debug.WriteLine(s);
 
-                if (!listFileItems.Any(x => x.FullPath == s) && !listScriptFileItems.Any(x => x.FullPath == s))
+                if (!listFileItems.Any(x => x.FullPath == s) 
+                    && !listScriptFileItems.Any(x => x.FullPath == s)
+                    && s.Substring(0, 1) != "~")
                 {
                     filePaths.Add(new ScriptFileItem(s));
                 }

@@ -51,6 +51,7 @@ namespace E3Packet
                 this.directoryName = Path.GetFileName(path);
             }  
         }
+        
     }
     public class FileItem : FolderItem
     {
@@ -96,6 +97,15 @@ namespace E3Packet
         public ScriptFileItem(string path) : base(path)
         {
             this.shortScriptName = Path.GetFileNameWithoutExtension(path);
+        }
+
+        /// <summary>
+        /// Override ToString method - return fullPath
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return FullPath;
         }
     }
 }

@@ -33,10 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ConnectToE3">
-      <HintPath>..\..\ConnectToE3\ConnectToE3\bin\Release\ConnectToE3.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -51,6 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AvailableScriptsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AvailableScriptsForm.Designer.cs">
+      <DependentUpon>AvailableScriptsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Files\FileLogic.cs" />
     <Compile Include="Files\FileModel.cs" />
     <Compile Include="GlobalConfig.cs" />
@@ -62,6 +64,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AvailableScriptsForm.resx">
+      <DependentUpon>AvailableScriptsForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="PacketForm.resx">
       <DependentUpon>PacketForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -98,6 +103,12 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
       <Private>True</Private>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ConnectToE3\ConnectToE3\ConnectToE3.csproj">
+      <Project>{80b2a29e-dd0f-4a1b-8375-60e3facfa28b}</Project>
+      <Name>ConnectToE3</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "E3Packet", "E3Packet\E3Packet.csproj", "{2AE7F054-647E-4F67-8ADF-BA158865817E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectToE3", "..\ConnectToE3\ConnectToE3\ConnectToE3.csproj", "{80B2A29E-DD0F-4A1B-8375-60E3FACFA28B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{2AE7F054-647E-4F67-8ADF-BA158865817E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AE7F054-647E-4F67-8ADF-BA158865817E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AE7F054-647E-4F67-8ADF-BA158865817E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80B2A29E-DD0F-4A1B-8375-60E3FACFA28B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80B2A29E-DD0F-4A1B-8375-60E3FACFA28B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80B2A29E-DD0F-4A1B-8375-60E3FACFA28B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80B2A29E-DD0F-4A1B-8375-60E3FACFA28B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
