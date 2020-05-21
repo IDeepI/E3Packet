@@ -10,6 +10,6 @@ namespace E3Packet
     class GlobalConfig
     {
         public static string scriptsDirName = ConfigurationManager.AppSettings["scriptsPath"];
-        public static string filesDirName = ConfigurationManager.AppSettings["filesPath"];
+        public static string filesDirName = ConfigurationManager.AppSettings["filesPath"];        
     }
 }

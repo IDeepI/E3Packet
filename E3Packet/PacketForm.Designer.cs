@@ -131,9 +131,12 @@
             this.listScripts.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listScripts.FormattingEnabled = true;
             this.listScripts.Location = new System.Drawing.Point(527, 16);
+            this.listScripts.MaximumSize = new System.Drawing.Size(500, 900);
             this.listScripts.Name = "listScripts";
+            this.listScripts.ScrollAlwaysVisible = true;
             this.listScripts.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.listScripts.Size = new System.Drawing.Size(256, 106);
+            this.listScripts.Sorted = true;
             this.listScripts.TabIndex = 17;
             this.listScripts.SelectedIndexChanged += new System.EventHandler(this.listScripts_SelectedIndexChanged);
             // 
@@ -142,9 +145,11 @@
             this.listScriptFolders.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listScriptFolders.FormattingEnabled = true;
             this.listScriptFolders.Location = new System.Drawing.Point(265, 16);
+            this.listScriptFolders.MaximumSize = new System.Drawing.Size(500, 900);
             this.listScriptFolders.Name = "listScriptFolders";
             this.listScriptFolders.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.listScriptFolders.Size = new System.Drawing.Size(256, 106);
+            this.listScriptFolders.Sorted = true;
             this.listScriptFolders.TabIndex = 15;
             this.listScriptFolders.SelectedIndexChanged += new System.EventHandler(this.listScriptFolders_SelectedIndexChanged);
             // 
@@ -162,9 +167,11 @@
             this.listFiles.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listFiles.FormattingEnabled = true;
             this.listFiles.Location = new System.Drawing.Point(3, 16);
+            this.listFiles.MaximumSize = new System.Drawing.Size(500, 900);
             this.listFiles.Name = "listFiles";
             this.listFiles.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.listFiles.Size = new System.Drawing.Size(256, 106);
+            this.listFiles.Sorted = true;
             this.listFiles.TabIndex = 14;
             this.listFiles.SelectedIndexChanged += new System.EventHandler(this.listFiles_SelectedIndexChanged);
             // 

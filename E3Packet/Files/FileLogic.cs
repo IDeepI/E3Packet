@@ -14,6 +14,7 @@ namespace E3Packet
 {
     public static class FileLogic
     {
+        public static bool ignoreSelectedIndexChanged = false;
         //public static Dictionary<string, string> scriptsDictionary = new Dictionary<string, string>();
         /// <summary>
         /// List of loaded scripts
@@ -38,9 +39,17 @@ namespace E3Packet
 
             var folderGroups = listScriptFileItems.GroupBy(f => f.DirectoryName).Select(g => g.Key).ToList();
 
+            // Get the current selection mode
+            SelectionMode selectionMode = listScriptFolders.SelectionMode;
+
+            // Set the selection mode to none
+            listScriptFolders.SelectionMode = SelectionMode.None;
+
+            // Set a new DataSource
             listScriptFolders.DataSource = folderGroups;
 
-
+            // Set back the original selection mode
+            listScriptFolders.SelectionMode = selectionMode; 
 
             //foreach (var ScriptFile in listScriptFileItems)
             //{
@@ -85,15 +94,9 @@ namespace E3Packet
         /// </summary>
         /// <param name="listOpendFiles"></param>
         private static void AddBrowsedFiles(ref ListBox listOpendFiles)
-        {
-            //foreach (var browsedFilePath in listFileItems)
-            //{
-            //if (!listOpendFiles.Items.Contains(browsedFilePath))
-            //{
-            // listOpendFiles.Items.Add(browsedFilePath, browsedFilePath.ItemSelected ? CheckState.Checked : CheckState.Unchecked);
-            listOpendFiles.DataSource = listFileItems;
-            //}
-            //}
+        {           
+            // Set a new DataSource
+            listOpendFiles.DataSource = listFileItems;          
         }
         /// <summary>
         /// Adding new files from processes to Form
@@ -110,6 +113,7 @@ namespace E3Packet
                 }
             }
         }
+
         /// <summary>
         /// Iterate through existing list of files to exclude already opened  
         /// </summary>
@@ -138,32 +142,31 @@ namespace E3Packet
         {
             if (listScriptFileItems != null)
             {
+                // Make DataSource for listbox with Scripts
                 var scriptFiles = listScriptFileItems.Where(s => listScriptFolders.SelectedItems.Contains(s.DirectoryName)).ToList();
 
+                ignoreSelectedIndexChanged = true;
+
+                // Set a new DataSource
                 listScripts.DataSource = scriptFiles;
+
+                listScripts.SelectedIndex = -1; // This optional line keeps the first item from being selected.                
 
                 if (listScripts.Items.Count > 0)
                 {
                     for (int i = 0; i < listScripts.Items.Count; i++)
                     {
-                        listScripts.SetSelected(i, listScriptFileItems.Where(s => s.DirectoryName == listScripts.Items[i].ToString()).Select(x => x.ItemSelected).FirstOrDefault());
+                        string selectedItemFullPath = ((ScriptFileItem)listScripts.Items[i]).FullPath;
+
+                        bool selected = (from ScriptFile in listScriptFileItems
+                                         where ScriptFile.FullPath == selectedItemFullPath
+                                         select ScriptFile.ItemSelected).First();
+
+                        listScripts.SetSelected(i, selected);
                     }
                 }
 
-
-                // listScripts.DataSource = listFileItems.Where(d => d.);
-
-                //foreach (var scriptFile in listScriptFileItems)
-                //{
-                //    foreach (var checkedFolder in listScriptFolders.SelectedItems)
-                //    {
-                //        if (scriptFile.directoryName == checkedFolder.ToString())
-                //        {
-                //            //  listScripts.Items.Add(scriptFile, scriptFile.ItemSelected ? CheckState.Checked : CheckState.Unchecked);                           
-                //            listScripts.DisplayMember = "shortScriptName";
-                //        }
-                //    }
-                //}
+                ignoreSelectedIndexChanged = false;
             }
         }
 
@@ -267,18 +270,18 @@ namespace E3Packet
         internal static void SetSelectedScripts(ListBox listAvailableScripts)
         {
             if (listScriptFileItems != null && listAvailableScripts != null)
-            {
-
-                foreach (var item in listAvailableScripts.Items)
+            {                
+                // Loop through all items the ListBox.
+                for (int x = 0; x < listAvailableScripts.Items.Count; x++)
                 {
-                    SetUnSelectedItem(ref listScriptFileItems, ((ScriptFileItem)item).FullPath);
+                    string itemPath = ((ScriptFileItem)listAvailableScripts.Items[x]).FullPath;
+                    // Determine if the item is selected.
+                    if (listAvailableScripts.GetSelected(x) == true)                        
+                        SetSelectedItem(ref listScriptFileItems, itemPath);
+                    else
+                        SetUnSelectedItem(ref listScriptFileItems, itemPath);
                 }
 
-                foreach (var item in listAvailableScripts.SelectedItems)
-                    {
-                        SetSelectedItem(ref listScriptFileItems, ((ScriptFileItem)item).FullPath);
-                    }
-                
             }
         }
 

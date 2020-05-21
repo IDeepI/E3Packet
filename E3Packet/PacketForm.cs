@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.Design;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -73,23 +72,23 @@ namespace E3Packet
             FileLogic.RefreshForm(ref listFiles);
         }
 
-      /*  private void BrowseForScripts_Click(object sender, EventArgs e)
-        {
-            openScriptDialog.Filter = "Scripts (*.vbs;*.exe)|*.vbs;*.exe";
-            openScriptDialog.Multiselect = true;
-            openScriptDialog.InitialDirectory = GlobalConfig.scriptsDirName;
+        /*  private void BrowseForScripts_Click(object sender, EventArgs e)
+          {
+              openScriptDialog.Filter = "Scripts (*.vbs;*.exe)|*.vbs;*.exe";
+              openScriptDialog.Multiselect = true;
+              openScriptDialog.InitialDirectory = GlobalConfig.scriptsDirName;
 
-            openScriptDialog.FilterIndex = 2;
-            openScriptDialog.RestoreDirectory = true;
+              openScriptDialog.FilterIndex = 2;
+              openScriptDialog.RestoreDirectory = true;
 
-            // Show the FolderBrowserDialog
-            DialogResult result = openScriptDialog.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                FileLogic.LoadScripts(openScriptDialog.FileNames, ref listScripts);
-                FileLogic.RefreshForm(ref listFiles);
-            }
-        }*/
+              // Show the FolderBrowserDialog
+              DialogResult result = openScriptDialog.ShowDialog();
+              if (result == DialogResult.OK)
+              {
+                  FileLogic.LoadScripts(openScriptDialog.FileNames, ref listScripts);
+                  FileLogic.RefreshForm(ref listFiles);
+              }
+          }*/
 
         private void RunExecution_Click(object sender, EventArgs e)
         {
@@ -115,27 +114,24 @@ namespace E3Packet
             }
         }
 
-      
+
 
         private void refreshFormButton_Click(object sender, EventArgs e)
         {
             FileLogic.RefreshForm(ref listFiles);
         }
 
-        private void listScripts_SelectedIndexChanged(object sender, EventArgs e)
+        public void listScripts_SelectedIndexChanged(object sender, EventArgs e)
         {
-            this.BeginInvoke(
-               (MethodInvoker)
-               (() => FileLogic.SetSelectedScripts(listScripts))
-               );
+            if (FileLogic.ignoreSelectedIndexChanged == false)
+            {
+                FileLogic.SetSelectedScripts(listScripts);
+            }          
         }
 
         private void listScriptFolders_SelectedIndexChanged(object sender, EventArgs e)
         {
-            this.BeginInvoke(
-                (MethodInvoker)
-                (() => FileLogic.FillScriptsFromSelectedFolders(listScriptFolders, listScripts))
-                );
+            FileLogic.FillScriptsFromSelectedFolders(listScriptFolders, listScripts);
 
             FileLogic.RefreshForm(ref listFiles);
             listScripts.Refresh();
@@ -144,10 +140,7 @@ namespace E3Packet
 
         private void listFiles_SelectedIndexChanged(object sender, EventArgs e)
         {
-            this.BeginInvoke(
-                (MethodInvoker)
-                (() => FileLogic.SetSelectedFiles(listFiles))
-                );
+            FileLogic.SetSelectedFiles(listFiles);
         }
     }
 }
