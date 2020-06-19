@@ -264,9 +264,12 @@ namespace E3Packet
                 e3Job e3Prj = (e3Job)e3App.CreateJobObject();
                 e3Prj.Save();
                 e3Prj.Close();
-                e3App.Quit();
+                //e3App.GetProcessProperty("");
+                AppConnect.CloseE3App(e3App);               
             }
         }
+
+      
 
         internal static void SetSelectedFiles(ListBox listOpendFiles)
         {
